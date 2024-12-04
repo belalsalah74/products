@@ -20,9 +20,17 @@ const elements = {
   form: document.querySelector("form"),
   inputs: document.querySelectorAll("form .form-control"),
   sortable: document.querySelectorAll(".sortable"),
+  main: document.querySelector("main"),
+  navBar: document.querySelector("nav"),
 };
 
 displayProducts(productsList);
+
+// init
+
+elements.main.style.minHeight = `calc(100vh - ${
+  getComputedStyle(elements.navBar).height
+})`;
 
 // Bootstrap
 const productModal = bootstrap.Modal.getOrCreateInstance(elements.productModal);
@@ -75,25 +83,36 @@ function sortProducts(e) {
   searchList ? displayProducts(searchList) : displayProducts();
 }
 function editInputs(product = null) {
-  elements.productName.value = product ? product.name : "";
-  elements.productPrice.value = product ? product.price : "";
-  elements.productCategory.value = product ? product.category : "";
-  elements.productImage.value = "";
-  elements.productDescription.value = product ? product.description : "";
+  if (product) {
+    elements.productName.value = product.name;
+    elements.productPrice.value = product.price;
+    elements.productCategory.value = product.category;
+    elements.productDescription.value = product.description;
+    const myFile = new File([""], product.imageSrc, {
+      type: `image/${product.imageSrc.slice(product.imageSrc.indexOf("."))}`,
+    });
+
+    const dataTransfer = new DataTransfer();
+
+    dataTransfer.items.add(myFile);
+
+    const fileList = dataTransfer.files;
+
+    elements.productImage.files = fileList;
+  } else {
+    elements.form.reset();
+    editSubmit();
+  }
 
   for (let input of elements.inputs) {
     input.classList.remove("is-valid");
-  }
-
-  if (elements.submitBtn.innerHTML.trim() === "Update") {
-    resetSubmit();
   }
 }
 
 function inputIsValid(input) {
   const regex = {
     name: /^[a-zA-Z][\w-]{2,250}/,
-    price: /^([6-9][0-9]{2}|[1-5][0-9]{3}|6000)$/,
+    price: /^([6-9][0-9]{3}|[1-5][0-9]{4}|60000)$/,
     category: /(Mobiles|Laptops|Screens|Accesories|PC)/,
     description: /^\w{0,250}$/,
   };
@@ -157,22 +176,21 @@ function addProduct(e) {
   e.preventDefault();
   if (formIsValid()) {
     let id = productsList.length + 1 || 1;
-    var product = {
+    let product = {
       name: elements.productName.value,
       price: elements.productPrice.value,
       category: elements.productCategory.value,
-      imageSrc: elements.productImage.files[0].name,
       description: elements.productDescription.value,
+      imageSrc: elements.productImage.files[0].name,
       id,
     };
+    product.image = structuredClone(elements.productImage.files[0]);
+    console.log(product);
     productsList.push(product);
     postAction();
     productModal.hide();
     successAlert("Succesfully added");
-    getCategories();
     clearTooltip.disable();
-  } else {
-    console.log("error");
   }
 }
 
@@ -181,7 +199,7 @@ function displayProducts(list = productsList) {
     elements.productsElement.innerHTML = "";
     list.forEach((product, index) => {
       elements.productsElement.innerHTML += `
-              <tr>
+              <tr class="align-middle text-center">
                 <td>${product.id}</td>
                   <td class="text-capitalize">
                   <span class="fw-medium">${
@@ -193,11 +211,11 @@ function displayProducts(list = productsList) {
                     </td>
                   <td class="fw-semibold">$${product.price}</td>
                   <td>
-                    <span class="badge bg-info-subtle fw-normal text-dark"
+                    <span class="badge bg-secondary fw-normal text-white"
                       >${product.category}</span
                     >
                   </td>
-                  <td class="text-wrap w-50 text-secondary-emphasis">
+                  <td class="text-wrap  text-secondary-emphasis">
                    ${product.description}
                   </td>
                   <td>
@@ -222,7 +240,7 @@ function displayProducts(list = productsList) {
   } else {
     elements.productsElement.innerHTML = `
       <tr>
-        <td colspan=4 class="text-secondary text-center">No products found</td>
+        <td colspan=7 class="text-secondary text-center">No products found</td>
       </tr>
       `;
   }
@@ -254,13 +272,13 @@ function editProduct(index) {
 }
 
 function editSubmit(index) {
-  elements.submitBtn.textContent = "Update";
-  elements.form.setAttribute("onSubmit", `updateProduct(event,${index})`);
-}
-
-function resetSubmit() {
-  elements.submitBtn.textContent = "Submit";
-  elements.form.setAttribute("onSubmit", "addProduct(event)");
+  if (index >= 0) {
+    elements.submitBtn.textContent = "Update";
+    elements.form.setAttribute("onSubmit", `updateProduct(event,${index})`);
+  } else {
+    elements.submitBtn.textContent = "Submit";
+    elements.form.setAttribute("onSubmit", "addProduct(event)");
+  }
 }
 
 function updateProduct(event, index) {
@@ -279,7 +297,7 @@ function updateProduct(event, index) {
       product.title = product.name;
     }
     postAction();
-  } else console.log("error");
+  }
 }
 
 function postAction(clear = false) {
@@ -297,6 +315,7 @@ function confirmClear() {
     clearAllModal.show();
   } else {
     clearTooltip.enable();
+    clearTooltip.show();
   }
 }
 

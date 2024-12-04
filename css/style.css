@@ -1,7 +1,7 @@
 td img {
     width: 50px;
     aspect-ratio: 1;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .fa-0{
@@ -15,4 +15,8 @@ td img {
     &:hover{
         background-color: aliceblue;
     }
+}
+
+#alert{
+    top: 80px;
 }

@@ -9,77 +9,92 @@
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
-    <main class="bg-light overflow-hidden min-vh-100">
+    <header>
+      <nav class="navbar py-3">
+        <div class="container">
+          <h1 class="w-50 text-nowrap mb-0 fw-bold">Product Dashboard</h1>
+        </div>
+      </nav>
+    </header>
+    <main class="overflow-hidden bg-light">
       <!-- Slert -->
-      <div class="mt-1 col-md-5 mx-auto" id="alert"></div>
-      <section class="mt-5 bg-info">
+      <div
+        class="w-auto position-absolute start-50 translate-middle-x mx-auto"
+        id="alert"
+      ></div>
+      <section class="mt-5 mb-1">
         <div class="container">
           <div class="row justify-content-between align-items-center">
-            <h1 class="col-3 h4">Products</h1>
-            <div class="col-2">
+            <h2 class="col-5 col-md-3 h3 mb-0">Products</h2>
+            <div class="col-5 text-end col-md-3">
               <button
-                class="btn btn-primary btn-lg icon-link"
+                class="btn btn-primary text-nowrap fs-5 icon-link"
                 data-bs-toggle="modal"
                 data-bs-target="#productModal"
               >
                 <i class="fa-solid fa-add"></i>
-                Add product
+                Add Product
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="mb-5">
+      <section class="mb-2">
         <div class="container">
-          <div class="bg-white rounded-2 shadow-sm p-5">
-            <!-- Start Search -->
-            <div
-              class="row justify-content-between align-items-center mb-5 mb-md-3"
-            >
-              <span
-                role="button"
-                id="clearBtn"
-                data-bs-toggle="tooltip"
-                data-bs-title="Nothing to clear!"
-                data-bs-delay="400"
-                class="col-1 link-body-emphasis"
-                >Clear all</span
+          <div class="row">
+            <div class="py-2 col">
+              <!-- Start Search -->
+              <div
+                class="row justify-content-between align-items-center mb-3 mb-md-2"
               >
-              <div class="input-group w-25">
-                <input
-                  type="search"
-                  id="search"
-                  class="form-control"
-                  placeholder="Search products"
-                />
-                <span class="input-group-text" id="basic-addon1"
-                  ><i class="fa-solid fa-search"></i
-                ></span>
+                <span
+                  role="button"
+                  id="clearBtn"
+                  data-bs-toggle="tooltip"
+                  data-bs-title="Nothing to clear!"
+                  data-bs-delay="400"
+                  class="col-5 col-md-3 link-body-emphasis"
+                  >Clear all</span
+                >
+                <div class="col-6 col-md-4">
+                  <div class="input-group">
+                    <input
+                      type="search"
+                      id="search"
+                      class="form-control"
+                      placeholder="Search products"
+                    />
+                    <span class="input-group-text"
+                      ><i class="fa-solid fa-search"></i
+                    ></span>
+                  </div>
+                </div>
               </div>
-            </div>
-         
-            <!-- Start Product -->
-            <div class="col-10 mx-auto">
-              <table class="table table-borderless">
-                <thead class="rounded-2">
-                  <tr class="table-light rounded-3">
-                    <th class="w-auto pointer sortable" id="numberRow">
-                      # <i class="fa-solid ms-1 fa-chevron-down fa-0"></i>
-                    </th>
-                    <th>Product</th>
-                    <th>Image</th>
-                   
-                    <th class="pointer sortable" id="priceRow">
-                      Price <i class="fa-solid ms-1 fa-chevron-down fa-0"></i>
-                    </th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th colspan="2"></th>
-                  </tr>
-                </thead>
-                <tbody id="products"></tbody>
-              </table>
+              <!-- Start Product -->
+              <div class="col">
+                <table class="table table-bordered">
+                  <thead class="rounded-2">
+                    <tr
+                      class="table-secondary rounded-3 align-middle text-center"
+                    >
+                      <th class="w-auto pointer sortable" id="numberRow">
+                        # <i class="fa-solid ms-1 fa-chevron-down fa-0"></i>
+                      </th>
+                      <th>Product</th>
+                      <th>Image</th>
+
+                      <th class="pointer sortable" id="priceRow">
+                        Price <i class="fa-solid ms-1 fa-chevron-down fa-0"></i>
+                      </th>
+                      <th>Category</th>
+                      <th class="w-25">Description</th>
+                      <th colspan="2"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="products"></tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -141,7 +156,6 @@
                     class="form-control form-control-lg"
                     placeholder="Product Price"
                     id="price"
-                    const
                   />
                   <p class="invalid-feedback mb-3 ms-1">
                     Product price must be between 600 and 6000.
@@ -153,7 +167,6 @@
                     class="form-control form-control-lg"
                     id="image"
                     accept="image/*"
-                    const
                   />
                   <p class="invalid-feedback mb-3 ms-1">
                     Please choose valid image.
@@ -164,7 +177,6 @@
                     placeholder="Product description (optional)"
                     class="form-control form-control-lg"
                     id="description"
-                    const
                   ></textarea>
                   <p class="invalid-feedback mb-3 ms-1">
                     Maximum 250 charactars.
