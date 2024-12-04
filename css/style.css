@@ -1,5 +1,18 @@
 td img {
-    width: 100px;
+    width: 50px;
     aspect-ratio: 1;
     object-fit: cover;
+}
+
+.fa-0{
+    font-size: 8px;
+    vertical-align: middle;
+}
+
+.pointer{
+    cursor: pointer;
+
+    &:hover{
+        background-color: aliceblue;
+    }
 }

@@ -3,14 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Product Dashboard</title>
     <link rel="stylesheet" href="./css/bootstrap.min.css" />
     <link rel="stylesheet" href="./css/all.min.css" />
     <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
     <main class="bg-light overflow-hidden min-vh-100">
-      <!-- Start Form -->
+      <!-- Slert -->
+      <div class="mt-1 col-md-5 mx-auto" id="alert"></div>
       <section class="mt-5 bg-info">
         <div class="container">
           <div class="row justify-content-between align-items-center">
@@ -19,7 +20,7 @@
               <button
                 class="btn btn-primary btn-lg icon-link"
                 data-bs-toggle="modal"
-                data-bs-target="#addProduct"
+                data-bs-target="#productModal"
               >
                 <i class="fa-solid fa-add"></i>
                 Add product
@@ -28,21 +29,24 @@
           </div>
         </div>
       </section>
-      <!-- Start Search -->
-      <section class="mb-5 bg-warning">
+
+      <section class="mb-5">
         <div class="container">
           <div class="bg-white rounded-2 shadow-sm p-5">
+            <!-- Start Search -->
             <div
               class="row justify-content-between align-items-center mb-5 mb-md-3"
             >
               <span
                 role="button"
-                data-bs-toggle="modal"
-                data-bs-target="#confirmDelete"
+                id="clearBtn"
+                data-bs-toggle="tooltip"
+                data-bs-title="Nothing to clear!"
+                data-bs-delay="400"
                 class="col-1 link-body-emphasis"
                 >Clear all</span
               >
-              <div class="input-group col-4 w-auto">
+              <div class="input-group w-25">
                 <input
                   type="search"
                   id="search"
@@ -54,57 +58,39 @@
                 ></span>
               </div>
             </div>
+         
             <!-- Start Product -->
-            <table class="table table-borderless">
-              <thead>
-                <tr class="table-light rounded-3">
-                  <th class="w-25">Product</th>
-                  <th class="w-25">Price</th>
-                  <th class="w-25">Category</th>
-                  <th class="w-25">Description</th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="products">
-                <!-- <tr>
-                  <td>Nike
-
-                     <img src="./imgs/meal-1.jpg" class="img-fluid "/>
-                  </td>
-                  <td>$230</td>
-                  <td>
-                    <span class="badge bg-info-subtle fw-normal text-dark"
-                      >Shoes</span
-                    >
-                  </td>
-                  <td class="text-wrap w-50 text-secondary-emphasis">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                    Quidem, ducimus?
-                  </td>
-                  <td>
-                    <button class="btn btn-success btn-sm py-2 icon-link">
-                      <i class="fa-solid fa-pen fa-fw"></i>
-                    </button>
-                  </td>
-                  <td>
-                    <button class="btn btn-sm btn-danger py-2 icon-link">
-                      <i class="fa-solid fa-trash fa-fw"></i>
-                    </button>
-                  </td>
-                </tr> -->
-              </tbody>
-            </table>
+            <div class="col-10 mx-auto">
+              <table class="table table-borderless">
+                <thead class="rounded-2">
+                  <tr class="table-light rounded-3">
+                    <th class="w-auto pointer sortable" id="numberRow">
+                      # <i class="fa-solid ms-1 fa-chevron-down fa-0"></i>
+                    </th>
+                    <th>Product</th>
+                    <th>Image</th>
+                   
+                    <th class="pointer sortable" id="priceRow">
+                      Price <i class="fa-solid ms-1 fa-chevron-down fa-0"></i>
+                    </th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th colspan="2"></th>
+                  </tr>
+                </thead>
+                <tbody id="products"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
 
       <!-- Form Modal -->
-      <div class="modal fade" id="addProduct">
+      <div class="modal fade" id="productModal">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5 border-0" id="addProductLabel">
+              <h1 class="modal-title fs-5 border-0" id="productModalLabel">
                 Add product
               </h1>
               <button
@@ -141,13 +127,11 @@
                     Please choose valid category.
                   </p>
                   <datalist id="category-list">
-                    <option value="iPhone"></option>
-                    <option value="Samsung"></option>
-                    <option value="Xiaomi"></option>
-                    <option value="Oppo"></option>
-                    <option value="iWatch"></option>
-                    <option value="Dell"></option>
-                    <option value="HP"></option>
+                    <option value="Mobiles"></option>
+                    <option value="Laptops"></option>
+                    <option value="Screens"></option>
+                    <option value="Accesories"></option>
+                    <option value="PC"></option>
                   </datalist>
                 </div>
 
@@ -209,11 +193,11 @@
         </div>
       </div>
       <!-- Clear Modal -->
-      <div class="modal fade" id="confirmDelete">
+      <div class="modal fade" id="clearAllModal">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="confirmDeleteLabel">
+              <h1 class="modal-title fs-5" id="clearAllModalLabel">
                 Confirm delete
               </h1>
               <button
@@ -235,7 +219,7 @@
                 type="button"
                 class="btn btn-danger"
                 data-bs-dismiss="modal"
-                onclick="confirmClear()"
+                onclick="clearAll()"
               >
                 Delete
               </button>
@@ -251,8 +235,8 @@
         </div>
       </div>
     </main>
-    
-    <script src="./js/crud.js"></script>
+
     <script src="./js/bootstrap.bundle.min.js"></script>
+    <script src="./js/crud.js"></script>
   </body>
 </html>
