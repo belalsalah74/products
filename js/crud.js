@@ -1,11 +1,8 @@
 "use strict";
 let productsList = JSON.parse(localStorage.getItem("productsList")) || [];
 let sorted = true;
-let isSearching = false;
-let isFiltering = false;
 let searchList;
 let filteredList;
-let showing;
 
 const elements = {
   productModal: document.getElementById("productModal"),
