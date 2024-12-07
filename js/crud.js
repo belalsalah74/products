@@ -61,7 +61,9 @@ elements.sortable.forEach((item) =>
 // Functions
 function getCategories() {
   const currenttCategories = new Set(productsList.map((p) => p.category));
-  elements.categorySelect.innerHTML = ` <option value="">All</option>`;
+  elements.categorySelect.innerHTML = `
+  <option selected disabled>Category</option>
+  <option value="">All</option>`;
   Array.from(currenttCategories).forEach((c) => {
     elements.categorySelect.innerHTML += ` <option value="${c}">${c}</option>`;
   });
@@ -399,6 +401,7 @@ function postAction(clear = false) {
   }
   if (clear) {
     localStorage.clear();
+    getCategories()
     return;
   }
   localStorage.setItem("productsList", JSON.stringify(productsList));
