@@ -1,7 +1,11 @@
 "use strict";
 let productsList = JSON.parse(localStorage.getItem("productsList")) || [];
 let sorted = true;
+let isSearching = false;
+let isFiltering = false;
 let searchList;
+let filteredList;
+let showing;
 
 const elements = {
   productModal: document.getElementById("productModal"),
@@ -12,6 +16,7 @@ const elements = {
   productImage: document.getElementById("image"),
   productDescription: document.getElementById("description"),
   productSearch: document.querySelector("input[type=search]"),
+  categorySelect: document.getElementById("categorySelect"),
   submitBtn: document.getElementById("submit-btn"),
   editBtn: document.getElementById("edit-btn"),
   clearBtn: document.getElementById("clearBtn"),
@@ -23,7 +28,6 @@ const elements = {
   main: document.querySelector("main"),
   navBar: document.querySelector("nav"),
 };
-
 displayProducts(productsList);
 
 // init
@@ -52,6 +56,17 @@ for (let input of elements.inputs) {
 elements.sortable.forEach((row) =>
   row.addEventListener("click", (e) => sortProducts(e))
 );
+// function getCategories() {
+//   const categories = new Set(productsList.map((p) => p.category));
+//   categorySelect.innerHTML = `
+//          <option value="">All</option>
+//         `;
+//   Array.from(categories).forEach((c) => {
+//     categorySelect.innerHTML += `
+//          <option value="${c}">${c}</option>
+//         `;
+//   });
+// }
 
 // Functions
 function sortProducts(e) {
@@ -153,23 +168,64 @@ function formIsValid() {
   return true;
 }
 
+elements.categorySelect.addEventListener("input", (e) => categoryFilter(e));
+function categoryFilter(e) {
+  let currentList = searchList ? [...searchList] : [...productsList];
+  filteredList = [];
+  if (e.target.value) {
+    for (let product of productsList) {
+      if (product.category === e.target.value) {
+        filteredList.push(product);
+      }
+    }
+    if (searchList) {
+      searchList = productsList.filter((p) =>
+        p.name.includes(elements.productSearch.value)
+      );
+      filteredList = searchList.filter((p) => p.category == e.target.value);
+    }
+    displayProducts(filteredList);
+  } else {
+    filteredList = null;
+    if (searchList) {
+      searchList = productsList.filter((p) =>
+        p.name.includes(elements.productSearch.value)
+      );
+      currentList = [...searchList];
+    }
+    displayProducts(currentList);
+  }
+}
 function productSearch(e) {
+  let currentList = filteredList ? [...filteredList] : [...productsList];
   searchList = [];
   const query = e.target.value;
-  for (let product of productsList) {
-    if (query.length) {
+  if (query.length) {
+    for (let product of productsList) {
       if (product.name.toLowerCase().includes(query.toLowerCase())) {
         searchList.push(product);
         product.title = product.name
           .toLowerCase()
           .replaceAll(query.toLowerCase(), `<mark>${query}</mark>`);
       }
-      displayProducts(searchList);
-    } else {
-      product.title = null;
-      searchList = null;
-      displayProducts();
     }
+    if (filteredList) {
+      filteredList = productsList.filter(
+        (p) => p.category == elements.categorySelect.value
+      );
+      searchList = filteredList.filter((p) => p.name.includes(query));
+    }
+    displayProducts(searchList);
+  } else {
+    productsList.forEach((p) => (p.title = null));
+    searchList = null;
+    // if (filteredList) {
+    //   filteredList = productsList.filter(
+    //     (p) => p.category == elements.categorySelect.value
+    //   );
+    //   currentList = [...filteredList];
+    // }
+    displayProducts(currentList);
   }
 }
 function addProduct(e) {
@@ -200,7 +256,7 @@ function displayProducts(list = productsList) {
     list.forEach((product, index) => {
       elements.productsElement.innerHTML += `
               <tr class="align-middle text-center">
-                <td>${product.id}</td>
+                <td>${index + 1}</td>
                   <td class="text-capitalize">
                   <span class="fw-medium">${
                     product.title || product.name

@@ -44,6 +44,19 @@
         <div class="container">
           <div class="row">
             <div class="py-2 col">
+              <div class="col-6 col-md-4 mb-3 ms-auto">
+                <!-- <div class="input-group">
+                  <input
+                    type="search"
+                    id="search"
+                    class="form-control"
+                    placeholder="Search products"
+                  />
+                  <span class="input-group-text"
+                    ><i class="fa-solid fa-search"></i
+                  ></span>
+                </div> -->
+              </div>
               <!-- Start Search -->
               <div
                 class="row justify-content-between align-items-center mb-3 mb-md-2"
@@ -57,7 +70,7 @@
                   class="col-5 col-md-3 link-body-emphasis"
                   >Clear all</span
                 >
-                <div class="col-6 col-md-4">
+                <div class="col-md-6  d-flex gap-1">
                   <div class="input-group">
                     <input
                       type="search"
@@ -69,6 +82,14 @@
                       ><i class="fa-solid fa-search"></i
                     ></span>
                   </div>
+                  <select id="categorySelect" class="form-select w-25">
+                    <option value="">All</option>
+                    <option value="Mobiles">Mobiles</option>
+                    <option value="Laptops">Laptops</option>
+                    <option value="Screens">Screens</option>
+                    <option value="Accesories">Accesories</option>
+                    <option value="PC">PC</option>
+                  </select>
                 </div>
               </div>
               <!-- Start Product -->

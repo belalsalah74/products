@@ -1,3 +1,4 @@
 *.txt
 bootstrap.bundle.js
 bootstrap.bundle.css
+*.vscode
