@@ -4,19 +4,34 @@ td img {
     object-fit: contain;
 }
 
-.fa-0{
+.fa-0 {
     font-size: 8px;
     vertical-align: middle;
 }
 
-.pointer{
+.pointer {
     cursor: pointer;
 
-    &:hover{
+    &:hover {
         background-color: aliceblue;
     }
 }
 
-#alert{
+.alert {
+    animation: fade 300ms ease-in-out;
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+
+#alert {
     top: 80px;
 }

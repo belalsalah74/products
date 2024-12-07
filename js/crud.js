@@ -1,9 +1,10 @@
 "use strict";
 let productsList = JSON.parse(localStorage.getItem("productsList")) || [];
+let categories = JSON.parse(localStorage.getItem("categoryList")) || [];
 let sorted = true;
 let searchList;
 let filteredList;
-
+let showing = "product";
 const elements = {
   productModal: document.getElementById("productModal"),
   clearAllModal: document.getElementById("clearAllModal"),
@@ -24,75 +25,81 @@ const elements = {
   sortable: document.querySelectorAll(".sortable"),
   main: document.querySelector("main"),
   navBar: document.querySelector("nav"),
+  categoryInput: document.getElementById("category-input"),
+  newCategory: document.getElementById("newCategory"),
+  categoryFeedback: document.getElementById("category-feedback"),
 };
-displayProducts(productsList);
 
 // init
 
-elements.main.style.minHeight = `calc(100vh - ${
-  getComputedStyle(elements.navBar).height
-})`;
+getCategories();
+displayProducts();
 
 // Bootstrap
-const productModal = bootstrap.Modal.getOrCreateInstance(elements.productModal);
-const clearAllModal = bootstrap.Modal.getOrCreateInstance(
-  elements.clearAllModal
-);
+const productModal = new bootstrap.Modal(elements.productModal);
+const clearAllModal = new bootstrap.Modal(elements.clearAllModal);
 const clearTooltip = new bootstrap.Tooltip(elements.clearBtn);
 clearTooltip.disable();
+
 // Events
 elements.form.setAttribute("onSubmit", "addProduct(event)");
 elements.productSearch.addEventListener("input", (event) =>
   productSearch(event)
 );
 elements.clearBtn.addEventListener("click", confirmClear);
+elements.categorySelect.addEventListener("input", (e) => categoryFilter(e));
 elements.productModal.addEventListener("hide.bs.modal", () => editInputs());
-for (let input of elements.inputs) {
-  input.addEventListener("change", (event) => inputIsValid(event.target));
-}
-elements.sortable.forEach((row) =>
-  row.addEventListener("click", (e) => sortProducts(e))
+
+
+elements.inputs.forEach((input) =>
+  input.addEventListener("change", (event) => inputIsValid(event.target))
 );
-// function getCategories() {
-//   const categories = new Set(productsList.map((p) => p.category));
-//   categorySelect.innerHTML = `
-//          <option value="">All</option>
-//         `;
-//   Array.from(categories).forEach((c) => {
-//     categorySelect.innerHTML += `
-//          <option value="${c}">${c}</option>
-//         `;
-//   });
-// }
+elements.sortable.forEach((item) =>
+  item.addEventListener("click", (e) => sortProducts(e))
+);
 
 // Functions
+function getCategories() {
+  const currenttCategories = new Set(productsList.map((p) => p.category));
+  elements.categorySelect.innerHTML = ` <option value="">All</option>`;
+  Array.from(currenttCategories).forEach((c) => {
+    elements.categorySelect.innerHTML += ` <option value="${c}">${c}</option>`;
+  });
+
+  elements.categoryInput.innerHTML = "";
+  categories.forEach((c) => {
+    elements.categoryInput.innerHTML += ` <option value="${c}">${c}</option>`;
+  });
+  if (categories.length) {
+    elements.newCategory.checked = false;
+  }
+}
 function sortProducts(e) {
   function sortArray(array, criteria) {
     if (sorted) {
       array.sort((a, b) => b[criteria] - a[criteria]);
       sorted = false;
-      e.target.firstElementChild.classList.replace(
+      e.currentTarget.firstElementChild.classList.replace(
         "fa-chevron-down",
         "fa-chevron-up"
       );
     } else {
-      array.sort((a, b) => a[criteria] - b[criteria]);
-      e.target.firstElementChild.classList.replace(
+      array.reverse();
+      e.currentTarget.firstElementChild.classList.replace(
         "fa-chevron-up",
         "fa-chevron-down"
       );
       sorted = true;
     }
+    displayProducts(array);
   }
-  if (e.target.id === "numberRow") {
-    searchList ? sortArray(searchList, "id") : sortArray(productsList, "id");
-  } else if (e.target.id === "priceRow") {
-    searchList
-      ? sortArray(searchList, "price")
-      : sortArray(productsList, "price");
+  if (showing === "search") {
+    sortArray(searchList, e.currentTarget.id.replace("Row", ""));
+  } else if (showing === "category") {
+    sortArray(filteredList, e.currentTarget.id.replace("Row", ""));
+  } else {
+    sortArray(productsList, e.currentTarget.id.replace("Row", ""));
   }
-
-  searchList ? displayProducts(searchList) : displayProducts();
 }
 function editInputs(product = null) {
   if (product) {
@@ -115,20 +122,43 @@ function editInputs(product = null) {
     elements.form.reset();
     editSubmit();
   }
-
+  if (categories.length) {
+    elements.newCategory.checked = false;
+  } else {
+    elements.newCategory.checked = true;
+  }
   for (let input of elements.inputs) {
-    input.classList.remove("is-valid");
+    input.classList.remove("is-valid", "is-invalid");
   }
 }
-
 function inputIsValid(input) {
   const regex = {
     name: /^[a-zA-Z][\w-]{2,250}/,
     price: /^([6-9][0-9]{3}|[1-5][0-9]{4}|60000)$/,
-    category: /(Mobiles|Laptops|Screens|Accesories|PC)/,
     description: /^\w{0,250}$/,
   };
-  if (input.type === "file") {
+  // validate category
+  if (input.id === "category") {
+    if (elements.newCategory.checked && input.value.length < 3) {
+      elements.categoryFeedback.innerHTML =
+        "Category must be at least 3 characters";
+      elements.categoryFeedback.style.display = "block";
+      addInValid();
+      return false;
+    } else if (!elements.newCategory.checked) {
+      if (!categories.includes(input.value)) {
+        addInValid();
+        elements.categoryFeedback.innerHTML = "Please choose valid category";
+        elements.categoryFeedback.style.display = "block";
+        return false;
+      }
+    }
+    addValid();
+    elements.categoryFeedback.style.display = "none";
+    return true;
+  }
+  // validate image
+  else if (input.type === "file") {
     if (!input.files.length || !input.files[0].type.startsWith("image/")) {
       addInValid();
       return false;
@@ -165,8 +195,8 @@ function formIsValid() {
   return true;
 }
 
-elements.categorySelect.addEventListener("input", (e) => categoryFilter(e));
 function categoryFilter(e) {
+  showing = "category";
   let currentList = searchList ? [...searchList] : [...productsList];
   filteredList = [];
   if (e.target.value) {
@@ -183,6 +213,7 @@ function categoryFilter(e) {
     }
     displayProducts(filteredList);
   } else {
+    showing = searchList ? "search" : "product";
     filteredList = null;
     if (searchList) {
       searchList = productsList.filter((p) =>
@@ -196,6 +227,7 @@ function categoryFilter(e) {
 function productSearch(e) {
   let currentList = filteredList ? [...filteredList] : [...productsList];
   searchList = [];
+  showing = "search";
   const query = e.target.value;
   if (query.length) {
     for (let product of productsList) {
@@ -216,19 +248,20 @@ function productSearch(e) {
   } else {
     productsList.forEach((p) => (p.title = null));
     searchList = null;
-    // if (filteredList) {
-    //   filteredList = productsList.filter(
-    //     (p) => p.category == elements.categorySelect.value
-    //   );
-    //   currentList = [...filteredList];
-    // }
+    if (filteredList) {
+      filteredList = productsList.filter(
+        (p) => p.category == elements.categorySelect.value
+      );
+      currentList = [...filteredList];
+    }
+    showing = filteredList ? "category" : "product";
     displayProducts(currentList);
   }
 }
 function addProduct(e) {
   e.preventDefault();
+  let id = +localStorage.getItem("id") || 1;
   if (formIsValid()) {
-    let id = productsList.length + 1 || 1;
     let product = {
       name: elements.productName.value,
       price: elements.productPrice.value,
@@ -237,13 +270,19 @@ function addProduct(e) {
       imageSrc: elements.productImage.files[0].name,
       id,
     };
-    product.image = structuredClone(elements.productImage.files[0]);
-    console.log(product);
     productsList.push(product);
+    if (elements.newCategory.checked) {
+      categories.push(elements.productCategory.value);
+      localStorage.setItem("categoryList", JSON.stringify(categories));
+      getCategories();
+    }
+
     postAction();
     productModal.hide();
     successAlert("Succesfully added");
     clearTooltip.disable();
+    id++;
+    localStorage.setItem("id", id);
   }
 }
 
@@ -253,7 +292,7 @@ function displayProducts(list = productsList) {
     list.forEach((product, index) => {
       elements.productsElement.innerHTML += `
               <tr class="align-middle text-center">
-                <td>${index + 1}</td>
+                <td>${product.id}</td>
                   <td class="text-capitalize">
                   <span class="fw-medium">${
                     product.title || product.name
@@ -276,13 +315,15 @@ function displayProducts(list = productsList) {
                       class="btn btn-success btn-sm py-2 edit-btn "
                       data-bs-toggle="modal"
                       data-bs-target="#productModal"
-                      onClick="editProduct(${index})"
+                      onClick="editProduct(${product.id})"
                     >
                         <i class="fa-solid fa-pen fa-fw"></i>
                    </button>
                   </td>
                   <td>
-                    <button class="btn btn-sm btn-danger py-2"  onclick="deleteProduct(${index})">
+                    <button class="btn btn-sm btn-danger py-2"  onclick="deleteProduct(${
+                      product.id
+                    })">
                       <i class="fa-solid fa-trash fa-fw"></i>
                     </button>
                   </td>
@@ -299,44 +340,39 @@ function displayProducts(list = productsList) {
   }
 }
 
-function deleteProduct(index) {
+function deleteProduct(id) {
+  const product = getProduct(id);
+  productsList.splice(productsList.indexOf(product), 1);
   if (searchList) {
-    let product = searchList[index];
-    searchList.splice(index, 1);
-    productsList.splice(productsList.indexOf(product), 1);
-  } else {
-    productsList.splice(index, 1);
+    searchList.splice(searchList.indexOf(product), 1);
+  }
+  if (filteredList) {
+    filteredList.splice(filteredList.indexOf(product), 1);
   }
   postAction();
 }
-function getProduct(index) {
-  let product;
-  if (searchList) {
-    product = productsList[productsList.indexOf(product)] = searchList[index];
-  } else {
-    product = productsList[index];
-  }
-  return product;
+function getProduct(id) {
+  return productsList.find((p) => p.id == id);
 }
-function editProduct(index) {
-  const product = getProduct(index);
+function editProduct(id) {
+  const product = getProduct(id);
   editInputs(product);
-  editSubmit(index);
+  editSubmit(id);
 }
 
-function editSubmit(index) {
-  if (index >= 0) {
+function editSubmit(id) {
+  if (id) {
     elements.submitBtn.textContent = "Update";
-    elements.form.setAttribute("onSubmit", `updateProduct(event,${index})`);
+    elements.form.setAttribute("onSubmit", `updateProduct(event,${id})`);
   } else {
     elements.submitBtn.textContent = "Submit";
     elements.form.setAttribute("onSubmit", "addProduct(event)");
   }
 }
 
-function updateProduct(event, index) {
+function updateProduct(event, id) {
   event.preventDefault();
-  const product = getProduct(index);
+  const product = getProduct(id);
   if (formIsValid()) {
     product.name = elements.productName.value;
     product.price = elements.productPrice.value;
@@ -346,7 +382,6 @@ function updateProduct(event, index) {
     productModal.hide();
     successAlert("Product updated successfully.");
     if (searchList) {
-      elements.productSearch.value = product.name;
       product.title = product.name;
     }
     postAction();
@@ -355,9 +390,15 @@ function updateProduct(event, index) {
 
 function postAction(clear = false) {
   editInputs();
-  searchList ? displayProducts(searchList) : displayProducts();
+  if (showing === "search") {
+    displayProducts(searchList);
+  } else if (showing == "category") {
+    displayProducts(filteredList);
+  } else {
+    displayProducts();
+  }
   if (clear) {
-    localStorage.removeItem("productsList");
+    localStorage.clear();
     return;
   }
   localStorage.setItem("productsList", JSON.stringify(productsList));
@@ -374,6 +415,7 @@ function confirmClear() {
 
 function clearAll() {
   productsList = [];
+  categories = [];
   postAction(true);
 }
 
@@ -383,33 +425,10 @@ function successAlert(message) {
         <div>${message}</div>
     </div>`;
   elements.alertPlaceholder.append(wrapper);
-  wrapper.animate(
-    [
-      {
-        opacity: 0,
-      },
-      {
-        opacity: 1,
-      },
-    ],
-    500
-  );
-
   const bsAlert = bootstrap.Alert.getOrCreateInstance(
     document.querySelector(".alert")
   );
   setTimeout(() => {
-    wrapper.animate(
-      [
-        {
-          opacity: 1,
-        },
-        {
-          opacity: 0,
-        },
-      ],
-      400
-    );
     bsAlert.close();
   }, 2500);
 }
